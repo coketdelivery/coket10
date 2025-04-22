@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>코켓배송 걸코충 시청자 EQ 테스트 🐾</title>
+  <style>
+    /* 기본 시스템 폰트 및 전체 배경 초기화 */
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 10px;
+      color: #3b2f2f;
+      overflow: hidden;
+      background: #fff;
+    }
+    /* 인트로 스크린 배경 이미지 적용 */
+    #introScreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('back.jpg') no-repeat center center;
+      background-size: cover;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      z-index: 100;
+    }
+    /* 인트로 컨텐츠 배경 흰색 박스 */
+    #introContent {
+      background: rgba(255,255,255,0.9);
+      padding: 20px 30px;
+      border-radius: 12px;
+    }
+    #introScreen h1 { font-size: 2.5rem; margin-bottom: 20px; color: #3b2f2f; }
+    #introScreen p { font-size: 1.2rem; margin: 10px 0; color: #3b2f2f; }
+    #startBtn {
+      padding: 14px 25px; font-size: 1.2rem;
+      border: none; border-radius: 25px;
+      background: #ffd54f; color: #3b2f2f;
+      cursor: pointer; transition: transform 0.1s;
+      margin-top: 20px;
+    }
+    #startBtn:hover { transform: scale(1.05); }
+
+    /* 테스트 영역은 흰 배경 */
+    #testArea {
+      display: none;
+      position: relative;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      background: #fff;
+    }
+    h1.test-title {
+      font-size: 2.2rem; text-align: center;
+      color: #d45d79;
+      margin-bottom: 20px;
+    }
+    .instructions {
+      background: #fff;
+      padding: 15px;
+      border: 2px dashed #d45d79;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    /* 문제 영역 박스 */
+    #question-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    .question-text { font-size: 1.3rem; margin-bottom: 15px; color: #5a3e3e; }
+    .options {
+      display: block; margin: 8px 0;
+      padding: 8px 12px; background: #ffeef4;
+      border-radius: 20px; cursor: pointer;
+      font-size: 1rem; transition: background 0.2s;
+    }
+    .options:hover { background: #ffd2e0; }
+    .options input[type="radio"] {
+      accent-color: #d45d79; margin-right: 10px; transform: scale(1.2);
+    }
+    .nav-buttons {
+      display: flex; justify-content: center;
+      gap: 15px; margin-top: 20px;
+    }
+    .nav-buttons button {
+      flex: 1; padding: 14px; font-size: 1.1rem;
+      border: none; border-radius: 25px;
+      background: #d45d79; color: #fff;
+      transition: transform 0.1s;
+    }
+    .nav-buttons button:disabled {
+      background: #f5a6bb; cursor: not-allowed;
+    }
+    .nav-buttons button:not(:disabled):hover { transform: scale(1.05); }
+
+    /* 게임 중 하단 크레딧 */
+    #credits {
+      display: none;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #3b2f2f;
+      margin-top: 15px;
+    }
+    #credits a { color: #d45d79; text-decoration: none; }
+
+    /* 결과 영역 */
+    #result {
+      display: none;
+      background: #fff;
+      border-radius: 12px; padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      font-size: 1.3rem; color: #5a3e3e;
+      text-align: center; margin-top: 20px;
+      white-space: pre-wrap;
+    }
+    /* 결과 문구 스타일 */
+    #result .cute-msg {
+      margin: 12px 0;
+      font-size: 1.1rem;
+      color: #d45d79;
+    }
+    #result .result-credit {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #3b2f2f;
+    }
+    /* 다시하기 버튼: 결과 후 노출 */
+    #retryBtn {
+      display: none;
+      padding: 14px 25px; font-size: 1.1rem;
+      border: none; border-radius: 30px;
+      background: linear-gradient(45deg, #ffeb3b, #ffd54f);
+      color: #3b2f2f;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transition: transform 0.1s;
+      margin: 20px auto 0;
+    }
+    #retryBtn:hover { transform: scale(1.1); }
+
+    @media (max-width: 600px) {
+      #introScreen h1 { font-size: 2rem; }
+      #introScreen p, h1.test-title { font-size: 1.2rem; }
+      .question-text { font-size: 1.2rem; }
+      .options { font-size: 0.95rem; }
+      .nav-buttons button, #startBtn, #retryBtn { font-size: 1rem; padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 인트로 스크린 -->
+  <div id="introScreen">
+    <div id="introContent">
+      <h1>❤️코켓배송 걸코충 EQ 테스트❤️</h1>
+      <p>총 20문항, 1~5점 선택으로 당신의 EQ를 확인해보세요.</p>
+      <p>유튜브 '걸코_Gulko' 저작권 콘텐츠입니다.<br>
+	    <a href="https://www.youtube.com/@Gulko" target="_blank">https://www.youtube.com/@Gulko</a>
+	  <p>© 2025 코켓게임즈. All rights reserved.<br>
+      <button id="startBtn" type="button">테스트 시작</button>
+    </div>
+  </div>
+
+  <!-- 테스트 영역 -->
+  <div id="testArea">
+    <h1 class="test-title">❤️ 궁금해?! 걸코충 EQ 테스트 ❤️</h1>
+    <div class="instructions">
+      <p>1: 전혀 그렇지 않다 | 2: 그렇지 않다 | 3: 보통이다 | 4: 그렇다 | 5: 매우 그렇다</p>
+    </div>
+
+    <div id="question-box" role="region" aria-live="polite"></div>
+    <div class="nav-buttons">
+      <button id="prevBtn" type="button" disabled>← 이전</button>
+      <button id="nextBtn" type="button">다음 →</button>
+    </div>
+
+    <!-- 게임 중 크레딧 -->
+    <div id="credits">
+      © 2025 코켓게임즈. All rights reserved.<br>
+      유튜브 '걸코_Gulko' 저작권 콘텐츠입니다.
+      <a href="https://www.youtube.com/@Gulko" target="_blank">https://www.youtube.com/@Gulko</a>
+    </div>
+
+    <div id="result" role="status"></div>
+    <button id="retryBtn" type="button">다시 하기</button>
+  </div>
+
+  <script>
+    const bgm = new Audio('back.mp3'); bgm.loop = true; bgm.volume = 0.3;
+    const clickSound = '1.mp3';
+
+    const questions = [
+      "걸코가 실수하거나 말실수를 했을 때, 그를 비난하기보다 이해하려 한다.",
+      "내가 남긴 채팅이 걸코에게 무시되더라도 감정을 조절하고 계속 긍정적으로 참여한다.",
+      "걸코가 힘들어 보여도 댓글이나 후원으로 조심스럽게 응원하려 한다.",
+      "다른 시청자와의 논쟁에서도 감정을 자제하고 건전한 소통을 유지한다.",
+      "라이브 방송 중 예상치 못한 상황이 생겨도 걸코의 입장에서 생각하려 한다.",
+      "방송 시간 변경이나 휴방 공지를 접했을 때 걸코에게 과도하게 실망하지 않는다.",
+      "걸코의 사생활이 공개되었을 때 과도한 관심보다 프라이버시를 존중한다.",
+      "내가 후원했을 때 반응이 없더라도 그것에 대해 서운함을 크게 느끼지 않는다.",
+      "걸코가 다른 팬들과 더 자주 소통한다고 느껴져도 질투보다 응원을 선택한다.",
+      "걸코의 컨텐츠가 마음에 들지 않아도 공격적인 언행 없이 피드백을 고려한다.",
+      "걸코가 장기간 휴식을 취할 때 감정적으로 받아들이기보다 회복을 응원한다.",
+      "다른 시청자들과의 관계에서 배려와 존중을 유지하려 노력한다.",
+      "나의 감정이 걸코의 감정에 영향을 미칠 수 있음을 인식한다.",
+      "논란이 생겼을 때 성급히 판단하지 않고 걸코의 입장을 먼저 들으려 한다.",
+      "다른 팬덤과 충돌 상황이 생겨도 차분하게 상황을 정리하려 한다.",
+      "채팅창에서 감정적인 표현을 삼가려 노력한다.",
+      "걸코가 인기 있는 다른 스트리머와 협업할 때 배신감보다 즐거움을 느낀다.",
+      "라이브에서 걸코가 감정을 드러낼 때 공감하며 진심으로 반응한다.",
+      "나의 피드백이 걸코에게 도움이 될지 고민하고 전달한다.",
+      "걸코의 성장 과정을 지켜보며 감정적으로 연결감을 느낀다."
+    ];
+
+    let current = 0;
+    let answers = [];
+
+    const intro = document.getElementById('introScreen');
+    const testArea = document.getElementById('testArea');
+    const qBox = document.getElementById('question-box');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const resultBox = document.getElementById('result');
+    const retryBtn = document.getElementById('retryBtn');
+    const credits = document.getElementById('credits');
+    const title = document.querySelector('.test-title');
+    const instructions = document.querySelector('.instructions');
+
+    function showIntro() {
+      intro.style.display = 'flex';
+      testArea.style.display = 'none';
+      credits.style.display = 'none';
+      bgm.pause();
+    }
+
+    function startTest() {
+      intro.style.display = 'none';
+      testArea.style.display = 'block';
+      title.style.display = 'block';
+      instructions.style.display = 'block';
+      credits.style.display = 'block';
+      qBox.style.display = 'block';                  // 질문 박스 보이기
+      prevBtn.style.display = 'inline-block';
+      nextBtn.style.display = 'inline-block';
+      prevBtn.disabled = true;
+      nextBtn.disabled = false;
+      current = 0;
+      answers = [];
+      bgm.currentTime = 0;
+      bgm.play();
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = questions[current];
+      let html = `<div class=\"question-text\">${current+1}. ${q}</div>`;
+      for (let i = 1; i <= 5; i++) {
+        const checked = answers[current] == i ? 'checked' : '';
+        html += `<label class=\"options\"><input type=\"radio\" name=\"q${current}\" value=\"${i}\" ${checked}>${i}</label>`;
+      }
+      qBox.innerHTML = html;
+      prevBtn.disabled = current === 0;
+      nextBtn.textContent = current === questions.length-1 ? '결과 보기' : '다음 →';
+    }
+
+    nextBtn.addEventListener('click', () => {
+      const sel = document.querySelector(`input[name=\"q${current}\"]:checked`);
+      if (!sel) return;
+      answers[current] = parseInt(sel.value);
+      new Audio(clickSound).play();
+      if (current < questions.length-1) {
+        current++;
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (current > 0) {
+        current--;
+        new Audio(clickSound).play();
+        renderQuestion();
+      }
+    });
+
+    function showResult() {
+      title.style.display = 'none';
+      instructions.style.display = 'none';
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
+      qBox.style.display = 'none';
+      credits.style.display = 'none';
+      const sum = answers.reduce((a,b) => a+b, 0);
+      let msg = '';
+      if (sum <= 60) { msg = '조금 더 EQ를 키워보세요!'; }
+      else if (sum <= 80) { msg = '무난한 EQ를 보유했어요!'; }
+      else if (sum <= 95) { msg = '높은 EQ를 가진 시청자군요!'; }
+      else { msg = 'EQ 마스터! ✨'; }
+      resultBox.innerHTML = `
+        <div>총점: ${sum}점</div>
+        <div class=\"cute-msg\">🐰 코팡은 걸코와 함께 <a href=\"https://www.youtube.com/@Gulko\" target=\"_blank\">https://www.youtube.com/@Gulko</a></div>
+        <div>${msg}</div>
+        <div class=\"result-credit\">유튜브 '걸코_Gulko' 저작권 콘텐츠입니다. <a href=\"https://www.youtube.com/@Gulko\" target=\"_blank\">https://www.youtube.com/@Gulko</a></div>
+      `;
+      resultBox.style.display = 'block';
+      retryBtn.style.display = 'block';
+      new Audio('5.mp3').play();              // 항상 5.mp3 재생
+    }
+
+    retryBtn.addEventListener('click', () => {
+      retryBtn.style.display = 'none';
+      resultBox.style.display = 'none';
+      showIntro();
+    });
+
+    document.getElementById('startBtn').addEventListener('click', startTest);
+
+    // 초기 화면 설정
+    showIntro();
+  </script>
+</body>
+</html>
